@@ -6,4 +6,6 @@
     <string name="main_activity_edittext_password_hint">Senha</string>
     <string name="main_activity_button_signup">Cadastrar</string>
     <string name="main_activity_button_clear">Limpar</string>
+    <string name="sign_up_activity_first_name_hint">Nome</string>
+    <string name="sign_up_activity_last_name_hint">Sobrenome</string>
 </resources>
