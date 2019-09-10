@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">FirebaseAuth</string>
+    <string name="main_activity_img_firebase_description">Icone do Firebase</string>
+    <string name="main_activity_edittext_email_hint">Email</string>
+    <string name="main_activity_button_signin">Entrar</string>
+    <string name="main_activity_edittext_password_hint">Senha</string>
+    <string name="main_activity_button_signup">Cadastrar</string>
+</resources>
