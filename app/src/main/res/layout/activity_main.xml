@@ -18,7 +18,7 @@
         android:contentDescription="@string/main_activity_img_firebase_description" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/editText_email"
+        android:id="@+id/editTextLayout_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -29,13 +29,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgFirebase">
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="1"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/editText_password"
+        android:id="@+id/editTextLayout_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -44,9 +45,10 @@
         android:hint="@string/main_activity_edittext_password_hint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText_email"
+        app:layout_constraintTop_toBottomOf="@+id/editTextLayout_email"
         app:errorEnabled="true">
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"/>
@@ -70,6 +72,6 @@
         android:layout_alignParentEnd="true"
         android:layout_marginTop="8dp"
         android:text="@string/main_activity_button_signup"
-        app:layout_constraintEnd_toEndOf="@+id/editText_password"
-        app:layout_constraintTop_toBottomOf="@+id/editText_password" />
+        app:layout_constraintEnd_toEndOf="@+id/editTextLayout_password"
+        app:layout_constraintTop_toBottomOf="@+id/editTextLayout_password" />
 </androidx.constraintlayout.widget.ConstraintLayout>
