@@ -5,4 +5,5 @@
     <string name="main_activity_button_signin">Entrar</string>
     <string name="main_activity_edittext_password_hint">Senha</string>
     <string name="main_activity_button_signup">Cadastrar</string>
+    <string name="main_activity_button_clear">Limpar</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.muriloconceicao.firebaseauth;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
@@ -7,6 +9,8 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.muriloconceicao.firebaseauth.signup.SignUpActivity;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -15,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthStateListener;
+
     @BindView(R.id.editText_email) EditText editText_email;
     @BindView(R.id.editText_password) EditText editText_password;
 
@@ -25,7 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_signup)
     public void onSignUpClick() {
-        // TODO
+        Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -36,10 +42,9 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseAuthStateListener = firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
-            if(user != null)
-                Log.d(TAG, "onAuthStateChanged: " + user.getUid());
-            else
-                Log.d(TAG, "onAuthStateChanged: Signed_Out");
+            if (user != null) {
+                Log.d(TAG, "onCreate: " + user.getUid());
+            }
         };
     }
 
@@ -55,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             firebaseAuth.removeAuthStateListener(firebaseAuthStateListener);
     }
 
-    public void checkLoginEditTexts() {
+    private void checkLoginEditTexts() {
         String userEmail = editText_email.getText().toString();
         String userPassword = editText_password.getText().toString();
 
