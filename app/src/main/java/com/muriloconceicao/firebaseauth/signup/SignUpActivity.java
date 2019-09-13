@@ -1,5 +1,7 @@
 package com.muriloconceicao.firebaseauth.signup;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -8,7 +10,12 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.FirebaseFunctionsException;
 import com.muriloconceicao.firebaseauth.R;
+import com.muriloconceicao.firebaseauth.home.HomeActivity;
+import com.muriloconceicao.firebaseauth.model.User;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +26,7 @@ import butterknife.OnClick;
 public class SignUpActivity extends AppCompatActivity {
     private FirebaseFirestore firestoreDb;
     private FirebaseAuth firebaseAuth;
+    private FirebaseFunctions firebaseFunctions;
 
     @BindView(R.id.editText_email) EditText editText_email;
     @BindView(R.id.editText_password) EditText editText_password;
@@ -40,26 +48,57 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
         ButterKnife.bind(this);
-        firebaseAuth = FirebaseAuth.getInstance();
-        firestoreDb = FirebaseFirestore.getInstance();
+        startFirebaseMethods();
     }
 
     private void checkSignUpEditTexts() {
-        String userEmail = editText_email.getText().toString();
-        String userPassword = editText_password.getText().toString();
-        String userFirstName = editText_firstname.getText().toString();
-        String userLastName = editText_lastname.getText().toString();
+        User user = new User();
 
-        if(userEmail.length() <= 0 || userPassword.length() <= 0)
-            Toast.makeText(this, "Digite seu Email e Senha.", Toast.LENGTH_SHORT).show();
-        else
-            signup(userEmail, userPassword, userFirstName, userLastName);
+        user.setEmail(editText_email.getText().toString());
+        user.setPassword(editText_password.getText().toString());
+        user.setFirstName(editText_firstname.getText().toString());
+        user.setLastName(editText_lastname.getText().toString());
+        String fullName = editText_firstname.getText().toString() + editText_lastname.getText().toString();
+        user.setFullName(fullName);
+
+        if(user.getEmail().length() <= 0 || user.getPassword().length() <= 0)
+            showError("Digite seu email e senha.");
+
+        fullNameExists(user);
+
     }
 
-    private void signup(String userEmail, String userPassword, String userFirstName, String userLastName) {
-        firebaseAuth.createUserWithEmailAndPassword(userEmail, userPassword).addOnCompleteListener(this, task -> {
+    private void fullNameExists(User user) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("fullName", user.getFullName());
+
+        firebaseFunctions
+                .getHttpsCallable("fullNameExists")
+                .call(data)
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()) {
+                        signup(user);
+                    } else {
+                        try {
+                            throw (FirebaseFunctionsException) Objects.requireNonNull(task.getException());
+                        } catch (FirebaseFunctionsException e) {
+                            FirebaseFunctionsException.Code code = e.getCode();
+                            String codeStr = code.toString();
+                            if(codeStr.equals("ALREADY_EXISTS"))
+                                showError("Nome completo já cadastrado.");
+                            else
+                                showError(codeStr);
+                        } catch (Exception e) {
+                            showError(e.getMessage());
+                        }
+                    }
+                });
+    }
+
+    private void signup(User user) {
+        firebaseAuth.createUserWithEmailAndPassword(user.getEmail(), user.getPassword()).addOnCompleteListener(this, task -> {
             if(task.isSuccessful()) {
-                createUserCollection(userEmail, userFirstName, userLastName);
+                createUserCollection(user);
             }
             else {
                 try {
@@ -74,30 +113,50 @@ public class SignUpActivity extends AppCompatActivity {
                     editText_email.setError("Usuário já existe.");
                     editText_email.requestFocus();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    showError(e.getMessage());
                 }
             }
         });
     }
 
-    private void createUserCollection(String userEmail,String userFirstName, String userLastName) {
-        Map<String, Object> user = new HashMap<>();
+    private void createUserCollection(User user) {
+        Map<String, Object> userCollection = new HashMap<>();
         String userId = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
-        user.put("id", userId);
-        user.put("first_name",userFirstName);
-        user.put("last_name",userLastName);
-        user.put("email", userEmail);
+        userCollection.put("id", userId);
+        userCollection.put("fullName", user.getFullName());
+        userCollection.put("email", user.getEmail());
+        userCollection.put("time", new Date().getTime());
 
         firestoreDb.collection("users")
-                .document(userEmail)
-                .set(user)
-                .addOnSuccessListener(aVoid -> Toast.makeText(SignUpActivity.this, "Usuário criado." , Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(SignUpActivity.this, "Falha ao criar usuário." + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .document(user.getFullName())
+                .set(userCollection)
+                .addOnSuccessListener(aVoid -> showSuccess())
+                .addOnFailureListener(e -> showError("Erro ao criar usuário."));
+    }
+
+    private void startFirebaseMethods() {
+        firestoreDb = FirebaseFirestore.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseFunctions = FirebaseFunctions.getInstance();
     }
 
     private void clearEditTexts() {
         editText_email.setText("");
         editText_password.setText("");
+        editText_firstname.setText("");
+        editText_lastname.setText("");
         editText_email.requestFocus();
+    }
+
+    private void showSuccess() {
+        Toast.makeText(this, "Usuário criado com sucesso.", Toast.LENGTH_SHORT).show();
+        clearEditTexts();
+        Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
+        startActivity(intent);
+    }
+
+    private void showError(String errorMessage) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+        clearEditTexts();
     }
 }

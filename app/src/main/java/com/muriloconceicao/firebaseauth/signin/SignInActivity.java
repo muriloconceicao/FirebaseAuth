@@ -1,22 +1,21 @@
-package com.muriloconceicao.firebaseauth;
+package com.muriloconceicao.firebaseauth.signin;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.muriloconceicao.firebaseauth.R;
+import com.muriloconceicao.firebaseauth.home.HomeActivity;
 import com.muriloconceicao.firebaseauth.signup.SignUpActivity;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+public class SignInActivity extends AppCompatActivity {
+    private static final String TAG = "SignInActivity";
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthStateListener;
 
@@ -30,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_signup)
     public void onSignUpClick() {
-        Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+        Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);
         startActivity(intent);
     }
 
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         String userPassword = editText_password.getText().toString();
 
         if(userEmail.length() <= 0 || userPassword.length() <= 0)
-            Toast.makeText(this, "Digite seu Email e Senha.", Toast.LENGTH_SHORT).show();
+            showError("Digite o email e senha.");
         else
             login(userEmail, userPassword);
     }
@@ -73,9 +72,16 @@ public class MainActivity extends AppCompatActivity {
     private void login(String userEmail, String userPassword) {
         firebaseAuth.signInWithEmailAndPassword(userEmail, userPassword).addOnCompleteListener(this, task -> {
             if(!task.isSuccessful())
-                Toast.makeText(this, "Email ou Senha inválidos.", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(this, "Login efetuado com sucesso", Toast.LENGTH_SHORT).show();
+                showError("Email ou Senha inválido.");
+            else {
+                Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
         });
     }
+
+    private void showError(String errorMessage) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
 }

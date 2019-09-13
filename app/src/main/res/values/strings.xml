@@ -8,4 +8,5 @@
     <string name="main_activity_button_clear">Limpar</string>
     <string name="sign_up_activity_first_name_hint">Nome</string>
     <string name="sign_up_activity_last_name_hint">Sobrenome</string>
+    <string name="activity_home_welcome_textView">Bem-vindo!</string>
 </resources>
